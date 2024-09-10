@@ -16,6 +16,51 @@ Installation For development:
  - `install-package-dev.sh` to install package in developer mode using `pip` (with dependencies)
 
 
+## Config file
+
+There is [example configuration file](examples/config_example.yaml) in examples. It has following content:
+
+<!-- insertstart include="examples/config_example.yaml" pre="\n\n```\n" post="\n```\n\n" -->
+
+```
+# configuration file
+
+general:
+    trayicon: true             # enable or disable tray icon
+    genloop: true              # enable or disable RSS generation loop (if set to 'false' then generation will be triggered only once)
+    startupdelay: 15           # set delay in seconds before first generation (useful on startup to wait for KeePassXC to start before) 
+    startserver: true          # set 'false' to prevent starting RSS server (just store data to local files), default: true
+    port: 8080                 # RSS feed port, default 8080
+    refreshtime: 3600          # time in seconds between consecutive RSS generator loop iterations, default 3600
+    dataroot: "data"           # path to store data; path absolute or relative to config directory
+                               # default value is app dir inside user home directory
+    logdir: "log"              # path to store logs; path absolute or relative to config directory
+                               # default value is app dir inside user home directory
+    logviewer: "gedit %s"      # command line to view log file, %s will be replaced with log path
+
+item:
+    - parser: "logging"                     # parser identifier
+      enabled: true                         # is parser enabled
+      params:
+        name: "app"                         # parser name (part of output path) 
+        logfile: "/var/log/app_log.txt"     # iniput log file path
+
+```
+
+<!-- insertend -->
+
+Fields are quite self-descriptive. There are two possible methods of authentication:
+- raw data stored inside the file
+- KeePassXC deamon.
+
+For KeePassXC there is `itemurl` field identifying item in the database.
+
+Moreover application can be executed without RSS server (`startserver = false`) or detached from system tray (`trayicon = true`).
+
+Some fields are common for config file and command-line arguments. In such cases command-line version has precedence 
+over values in the file (overrides values taken from config file).
+
+
 ## References
 
 - [grok description](https://github.com/garyelephant/pygrok/tree/master)

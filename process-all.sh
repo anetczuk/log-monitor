@@ -18,7 +18,7 @@ echo "running tests under venv"
 $SCRIPT_DIR/tools/installvenv.sh --no-prompt
 $SCRIPT_DIR/venv/runtests.py
 
-if [ -d "$SCRIPT_DIR/examples" ]; then
+if [ -f "$SCRIPT_DIR/examples/generate-all.sh" ]; then
 	echo "generating examples results"
     $SCRIPT_DIR/examples/generate-all.sh
 fi

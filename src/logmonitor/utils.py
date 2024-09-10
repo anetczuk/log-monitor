@@ -17,12 +17,14 @@ import pytz
 
 from appdirs import user_data_dir
 
+from logmonitor.persist import load_object_simple, store_object_simple
+
 
 _LOGGER = logging.getLogger(__name__)
 
 
 def get_app_datadir():
-    data_dir = user_data_dir("rss-forward")
+    data_dir = user_data_dir("log-monitor")
     os.makedirs(data_dir, exist_ok=True)
     return data_dir
 
@@ -42,15 +44,15 @@ def get_recent_date():
     return today_datetime
 
 
-# def read_recent_date():
-#     recentdate_path = get_recentdate_path()
-#     return rssforward.persist.load_object_simple(recentdate_path)
-#
-#
-# def save_recent_date(recent_datetime):
-#     _LOGGER.info("storing recent date: %s", recent_datetime)
-#     recentdate_path = get_recentdate_path()
-#     rssforward.persist.store_object_simple(recent_datetime, recentdate_path)
+def read_recent_date():
+    recentdate_path = get_recentdate_path()
+    return load_object_simple(recentdate_path)
+
+
+def save_recent_date(recent_datetime):
+    _LOGGER.info("storing recent date: %s", recent_datetime)
+    recentdate_path = get_recentdate_path()
+    store_object_simple(recent_datetime, recentdate_path)
 
 
 def string_to_date_general(date_string) -> datetime.datetime:
@@ -133,6 +135,11 @@ def normalize_string(content: str) -> str:
     # return string_encode.decode()
 
     return content
+
+
+def read_data(file_path):
+    with open(file_path, "r", encoding="utf8") as fp:
+        return fp.read()
 
 
 def write_data(file_path, content):
