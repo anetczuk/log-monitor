@@ -30,7 +30,8 @@ class LoggingParserWrapper(RSSGenerator):
 
     def generate(self) -> Dict[str, str]:
         log_list = self.parser.parse_file(self.logfile)
-        content = str(log_list)
+        string_list = [str(item) for item in log_list]
+        content = "\n".join(string_list)
         return {self.logname: content}
 
 
@@ -76,10 +77,11 @@ class RSSManager:
         """
         if not self._generators:
             # not initialized
+            _LOGGER.warning("invalid state - no generators")
             return False
         for gen_id, gen_state in self._generators:
             if not gen_state.valid:
-                _LOGGER.info("invalid generator: %s", gen_id)
+                _LOGGER.warning("invalid generator: %s", gen_id)
                 return False
         # everything ok
         return True
@@ -189,7 +191,7 @@ class ThreadedRSSManager:
                 return
             self._execute_loop = True
             self._thread = threading.Thread(target=self._run_loop, args=[refresh_time, startupdelay])
-            _LOGGER.warning("starting thread")
+            _LOGGER.info("starting thread")
             self._thread.start()
 
     def stop(self):
@@ -267,8 +269,8 @@ class ThreadedRSSManager:
                 self._execute_loop = False
 
     def _call_gen(self):
-        if self._state_callback:
-            self._state_callback(False)
+        # if self._state_callback:
+        #     self._state_callback(False)
 
         try:
             self._manager.generate_data()

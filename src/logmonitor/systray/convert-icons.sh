@@ -13,6 +13,8 @@ for in_file in "$SCRIPT_DIR"/*.png; do
 	echo "converting $in_file to $out_file"
 	convert "$in_file" -negate "$out_file"
 	convert -resize 512x512! "$out_file" "$out_file"
+
+	convert -strip "$out_file" "$out_file"
 done
 
 

@@ -87,6 +87,8 @@ class LoggingParser(ABCParser):
                         # there should be message, because there is next line of multiline log
                         raise RuntimeError("unexpected log")
                     last_line["message"] += "\n" + item
+                else:
+                    raise RuntimeError("unable to match pattern to content")
                 continue
 
             if self.datetime_grok:
