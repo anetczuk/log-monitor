@@ -2,6 +2,37 @@
 
 Parse log files and expose data in form of RSS feed.
 
+Application provides RSS channel for content parsed from log files.
+RSS provided by the application can be used for example in *Thunderbird* or other feed reader.
+
+Typical use case consists of running application on remote machine (e.g. RPi on LAN) and configure feed reader 
+to receive the feed, so crytical logs can be received without additional effort.
+
+
+## Running
+
+[There](doc/cmdargs.md) is description of command line arguments.
+
+To run application simply execute followoing command:
+```
+python3 -m logmonitor start -c <apth-to-config.toml>
+```
+
+As result application will be started with additional icon in system tray allowing to simple control over the application.
+
+Then generated RSS data can be imported to any feed reader using file directly or URL, e.g:
+- `file:///<path-to-data-root>/<parser-id>/<feed-name-file>` 
+- `http://<server-address>/<parser-id>/<feed-name-file>`
+
+where `<path-to-data-root>` is configurable in config file, `<parser-id>` and 
+`<feed-name-file>` are defined for each `RSSGenerator` (log parser) and `<server-address>` is IP or hostname of machine with 
+running application.
+
+If use case is to just generate RSS data then execute following:
+```
+python3 -m logmonitor generate -c <apth-to-config.toml>
+```
+
 
 ## Installation
 
@@ -13,7 +44,7 @@ Installation of package can be done by:
 Installation For development:
  - `install-deps.sh` to install package dependencies only (`requirements.txt`)
  - `install-package.sh` to install package in standard way through `pip` (with dependencies)
- - `install-package-dev.sh` to install package in developer mode using `pip` (with dependencies)
+ - `install-devel.sh` to install package in developer mode using `pip` (with dependencies)
 
 
 ## Config file
@@ -26,7 +57,6 @@ There is [example configuration file](examples/config_example.yaml) in examples.
 # configuration file
 
 general:
-    trayicon: true             # enable or disable tray icon
     startupdelay: 15           # set delay in seconds before first generation (useful on startup to wait for KeePassXC to start before) 
     startserver: true          # set 'false' to prevent starting RSS server (just store data to local files), default: true
     port: 8080                 # RSS feed port, default 8080
@@ -52,13 +82,7 @@ item:
 
 <!-- insertend -->
 
-Fields are quite self-descriptive. There are two possible methods of authentication:
-- raw data stored inside the file
-- KeePassXC deamon.
-
-For KeePassXC there is `itemurl` field identifying item in the database.
-
-Moreover application can be executed without RSS server (`startserver = false`) or detached from system tray (`trayicon = true`).
+Fields are quite self-descriptive.
 
 Some fields are common for config file and command-line arguments. In such cases command-line version has precedence 
 over values in the file (overrides values taken from config file).
