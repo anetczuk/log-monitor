@@ -6,9 +6,21 @@
 # LICENSE file in the root directory of this source tree.
 #
 
+from abc import ABC, abstractmethod
 
-class ABCParser:
+from logmonitor.utils import read_data
+
+
+class ABCParser(ABC):
     """Abstract parser."""
 
     def __init__(self):
         pass
+
+    def parse_file(self, file_path):
+        content = read_data(file_path)
+        return self.parse_content(content)
+
+    @abstractmethod
+    def parse_content(self, content):
+        raise NotImplementedError("method not implemented")
