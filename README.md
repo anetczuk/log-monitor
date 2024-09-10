@@ -44,6 +44,10 @@ item:
       params:
         name: "app"                         # parser name (part of output path) 
         logfile: "/var/log/app_log.txt"     # iniput log file path
+        # log entry format as in configuration of Python's logging module
+        fmt: "%(asctime)s,%(msecs)-3d %(levelname)-8s %(threadName)s %(name)s:%(funcName)s [%(filename)s:%(lineno)d] %(message)s"
+        datefmt: "%Y-%m-%d %H:%M:%S"        # datetime format as in configuration of Python's logging module
+        loglevel: "WARNING"                 # log level threshold (same as in Python's logging module)
 
 ```
 

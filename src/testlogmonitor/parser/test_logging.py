@@ -70,9 +70,7 @@ class LoggingParserTest(unittest.TestCase):
             " %(threadName)s %(name)s:%(funcName)s [%(filename)s:%(lineno)d] %(message)s",
             "%Y-%m-%d %H:%M:%S",
         )
-        log_content = (
-            "2024-09-09 20:30:24,86  DEBUG    MainThread __main__:main [main.py:89] Starting the application"
-        )
+        log_content = "2024-09-09 20:30:24,86  DEBUG    MainThread __main__:main [main.py:89] Starting the application"
         response = parser.parse_content(log_content)
         data = {
             "asctime": {"H": "20", "M": "30", "S": "24", "Y": "2024", "d": "09", "m": "09"},
