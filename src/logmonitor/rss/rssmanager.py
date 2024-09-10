@@ -9,6 +9,7 @@
 import os
 import logging
 from typing import Dict, List, Tuple
+from enum import Enum, auto, unique
 import threading
 
 from logmonitor.utils import save_recent_date, get_recent_date, write_data
@@ -154,6 +155,13 @@ class RSSManager:
             write_data(feed_path, content)
 
 
+@unique
+class RSSManagerState(Enum):
+    PROCESSING = auto()
+    VALID = auto()
+    ERROR = auto()
+
+
 #
 class ThreadedRSSManager:
     def __init__(self, manager: RSSManager):
@@ -241,11 +249,13 @@ class ThreadedRSSManager:
 
         except KeyboardInterrupt:
             _LOGGER.error("keyboard interrupt")
+            self._callback_state(RSSManagerState.ERROR)
             # executed in case of exception
             raise
 
         except BaseException as exc:
-            _LOGGER.exception("exception occurred in thread loop: %s type: %s", exc, type(exc))
+            _LOGGER.exception("exception occurred in thread loop: %s", exc)
+            self._callback_state(RSSManagerState.ERROR)
             # executed in case of exception
             raise
 
@@ -254,8 +264,7 @@ class ThreadedRSSManager:
                 self._execute_loop = False
 
     def _call_gen(self):
-        # if self._state_callback:
-        #     self._state_callback(False)
+        self._callback_state(RSSManagerState.PROCESSING)
 
         try:
             self._manager.generate_data()
@@ -265,7 +274,15 @@ class ThreadedRSSManager:
 
         if self._state_callback:
             valid = self._manager.is_gen_valid()
-            self._state_callback(valid)
+            if valid:
+                self._callback_state(RSSManagerState.VALID)
+            else:
+                self._callback_state(RSSManagerState.ERROR)
+
+    def _callback_state(self, state: RSSManagerState):
+        if not self._state_callback:
+            return
+        self._state_callback(state)
 
     def join(self):
         with self._lock:

@@ -43,9 +43,9 @@ import subprocess  # nosec
 
 from logmonitor import logger
 from logmonitor.configfileyaml import load_config, ConfigField
-from logmonitor.rss.rssmanager import ThreadedRSSManager, RSSManager
+from logmonitor.rss.rssmanager import ThreadedRSSManager, RSSManager, RSSManagerState
 from logmonitor.rss.rssserver import RSSServerManager
-from logmonitor.systray.traymanager import TrayManager
+from logmonitor.systray.traymanager import TrayManager, TrayManagerState
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -62,6 +62,20 @@ def open_log(log_viewer, log_path):
         pass
 
 
+def state_converter(manager_state: RSSManagerState, tray_manager: ThreadedRSSManager):
+    if manager_state is RSSManagerState.PROCESSING:
+        tray_manager.set_state(TrayManagerState.PROCESSING)
+        return
+    if manager_state is RSSManagerState.VALID:
+        tray_manager.set_valid(True)
+        return
+    if manager_state is RSSManagerState.ERROR:
+        tray_manager.set_valid(False)
+        return
+    tray_manager.set_valid(False)
+    raise RuntimeError(f"unhandled manager state: {manager_state.name}")
+
+
 def start_with_tray(parameters):
     if parameters is None:
         parameters = {}
@@ -74,7 +88,7 @@ def start_with_tray(parameters):
     rss_port = general_section.get(ConfigField.PORT.value, 8080)
     startupdelay = general_section.get(ConfigField.STARTUPDELAY.value, 0)
 
-    tray_manager = TrayManager(server_state=start_server)
+    tray_manager = TrayManager(start_enabled=start_server)
 
     # async start of RSS server
     rss_server = RSSServerManager()
@@ -92,7 +106,7 @@ def start_with_tray(parameters):
     tray_manager.set_rss_server_callback(rss_server.switch_state)
     tray_manager.set_refresh_callback(threaded_manager.execute_single)
 
-    threaded_manager.set_state_callback(tray_manager.set_valid)
+    threaded_manager.set_state_callback(lambda manager_state: state_converter(manager_state, tray_manager))
 
     log_path = os.path.join(log_dir, "log.txt")
     tray_manager.set_open_log_callback(lambda: open_log(log_viewer, log_path))
