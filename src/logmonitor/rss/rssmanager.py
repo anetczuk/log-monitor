@@ -12,30 +12,15 @@ from typing import Dict, List, Tuple
 import threading
 
 from logmonitor.utils import save_recent_date, get_recent_date, write_data
-from logmonitor.rss.rssgenerator import RSSGenerator
 from logmonitor.configfileyaml import ConfigField, ConfigKey
-
-from logmonitor.parser.logging import LoggingParser
+from logmonitor.rss.generator.rssgenerator import RSSGenerator
+from logmonitor.rss.generator.logginggen import LoggingGenerator
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class LoggingParserWrapper(RSSGenerator):
-    def __init__(self, name=None, logfile=None, **kwargs):
-        super().__init__()
-        self.parser = LoggingParser(**kwargs)
-        self.logname = name
-        self.logfile = logfile
-
-    def generate(self) -> Dict[str, str]:
-        log_list = self.parser.parse_file(self.logfile)
-        string_list = [str(item) for item in log_list]
-        content = "\n".join(string_list)
-        return {self.logname: content}
-
-
-GENERATOR_DICT = {"logging": LoggingParserWrapper}
+GENERATOR_DICT = {"logging": LoggingGenerator}
 
 
 def get_generator(generator_id, generator_params_dict=None) -> RSSGenerator:

@@ -24,7 +24,7 @@ class LoggingParserTest(unittest.TestCase):
         pattern = LoggingParser.parse_format(fmt)
         self.assertEqual(
             pattern,
-            "%{DATA:asctime},%{NONNEGINT:msecs} %{NOTSPACE:levelname}%{SPACE} %{NOTSPACE:threadName}"
+            "%{DATA:asctime},%{NONNEGINT:msecs}%{SPACE} %{NOTSPACE:levelname}%{SPACE} %{NOTSPACE:threadName}"
             " %{NOTSPACE:name}:%{NOTSPACE:funcName} \\[%{NOTSPACE:filename}:%{NONNEGINT:lineno}\\]"
             " %{GREEDYDATA:message}",
         )
@@ -36,7 +36,7 @@ class LoggingParserTest(unittest.TestCase):
             pattern, "%{NONNEGINT:Y}-%{NONNEGINT:m}-%{NONNEGINT:d} %{NONNEGINT:H}:%{NONNEGINT:M}:%{NONNEGINT:S}"
         )
 
-    def test_parse(self):
+    def test_parse_01(self):
         self.maxDiff = None
         parser = LoggingParser(
             "%(asctime)s,%(msecs)-3d %(levelname)-8s"
@@ -59,7 +59,33 @@ class LoggingParserTest(unittest.TestCase):
             "lineno": "86",
             "message": "downloading completed",
         }
-        self.assertListEqual([sort_dict(data)], response)
+        self.assertListEqual([[log_content, sort_dict(data)]], response)
+
+    def test_parse_02(self):
+        # log entry with two digits milliseconds
+
+        self.maxDiff = None
+        parser = LoggingParser(
+            "%(asctime)s,%(msecs)-3d %(levelname)-8s"
+            " %(threadName)s %(name)s:%(funcName)s [%(filename)s:%(lineno)d] %(message)s",
+            "%Y-%m-%d %H:%M:%S",
+        )
+        log_content = (
+            "2024-09-09 20:30:24,86  DEBUG    MainThread __main__:main [main.py:89] Starting the application"
+        )
+        response = parser.parse_content(log_content)
+        data = {
+            "asctime": {"H": "20", "M": "30", "S": "24", "Y": "2024", "d": "09", "m": "09"},
+            "msecs": "86",
+            "levelname": "DEBUG",
+            "threadName": "MainThread",
+            "name": "__main__",
+            "funcName": "main",
+            "filename": "main.py",
+            "lineno": "89",
+            "message": "Starting the application",
+        }
+        self.assertListEqual([[log_content, sort_dict(data)]], response)
 
     def test_parse_multiline(self):
         self.maxDiff = None
@@ -83,4 +109,4 @@ class LoggingParserTest(unittest.TestCase):
             "lineno": "86",
             "message": "downloading completed\nsecond log line\nthird log line",
         }
-        self.assertListEqual([sort_dict(data)], response)
+        self.assertListEqual([[log_content, sort_dict(data)]], response)

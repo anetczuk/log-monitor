@@ -69,33 +69,33 @@ def string_to_date_general(date_string) -> datetime.datetime:
 
 
 # iso format: '2024-06-04T14:23:41Z'
-def stringiso_to_date(datetime_string) -> datetime.datetime:
+def string_iso_to_date(datetime_string) -> datetime.datetime:
     item_date = datetime.datetime.fromisoformat(datetime_string)
     return add_timezone(item_date)
 
 
 # handled format: 2024-06-04T14:23:41.077Z
-def stringiso2_to_date(datetime_string) -> datetime.datetime:
+def string_iso2_to_date(datetime_string) -> datetime.datetime:
     item_date = datetime.datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%SZ")
     return add_timezone(item_date)
 
 
 # handled format: 2024-06-04T14:23:41.077Z
-def stringisoz_to_date(datetime_string) -> datetime.datetime:
+def string_isoz_to_date(datetime_string) -> datetime.datetime:
     item_date = datetime.datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%S.%fZ")
     return add_timezone(item_date)
 
 
-def stringisoauto_to_date(datetime_string) -> datetime.datetime:
+def string_isoauto_to_date(datetime_string) -> datetime.datetime:
     try:
-        return stringiso2_to_date(datetime_string)
+        return string_iso2_to_date(datetime_string)
     except ValueError:
         pass
     try:
-        return stringisoz_to_date(datetime_string)
+        return string_isoz_to_date(datetime_string)
     except ValueError:
         pass
-    return stringiso_to_date(datetime_string)
+    return string_iso_to_date(datetime_string)
 
 
 def string_to_date(date_string) -> datetime.datetime:
@@ -150,6 +150,12 @@ def write_data(file_path, content):
 def calculate_dict_hash(data_dict):
     data_str = json.dumps(data_dict, sort_keys=True)
     data_bytes = data_str.encode("utf-8")
+    hash_value = hashlib.md5(data_bytes).hexdigest()  # nosec
+    return hash_value
+
+
+def calculate_hash(data_string):
+    data_bytes = data_string.encode("utf-8")
     hash_value = hashlib.md5(data_bytes).hexdigest()  # nosec
     return hash_value
 

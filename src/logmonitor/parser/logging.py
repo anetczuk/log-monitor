@@ -77,16 +77,13 @@ class LoggingParser(ABCParser):
     def parse_content(self, content):
         ret_list = []
         lines = content.splitlines()
-        for item in lines:
-            found = self.grok.match(item)
+        for raw_line in lines:
+            found = self.grok.match(raw_line)
             if found is None:
                 # continuation of multiline log
                 if ret_list:
-                    last_line = ret_list[-1]
-                    if "message" not in last_line:
-                        # there should be message, because there is next line of multiline log
-                        raise RuntimeError("unexpected log")
-                    last_line["message"] += "\n" + item
+                    prev_entry = ret_list[-1]
+                    self._append_text(prev_entry, raw_line)
                 else:
                     raise RuntimeError("unable to match pattern to content")
                 continue
@@ -98,8 +95,18 @@ class LoggingParser(ABCParser):
                     if datetime_found:
                         found["asctime"] = datetime_found
 
-            ret_list.append(found)
+            ret_list.append([raw_line, found])
         return ret_list
+
+    @staticmethod
+    def _append_text(data_entry, text):
+        data_dict = data_entry[1]
+        if "message" not in data_dict:
+            # there should be message, because there is next line of multiline log
+            raise RuntimeError("unexpected log")
+
+        data_entry[0] += "\n" + text
+        data_dict["message"] += "\n" + text
 
     @staticmethod
     # style='%' -- not supported yet
@@ -150,7 +157,7 @@ class LoggingParser(ABCParser):
             pattern = f"%{{{token_pattern}:{token}}}"
             pattern_list.append(pattern)
 
-            if token_type == "s":  # nosec
+            if token_type in ("s", "d"):  # nosec
                 if token_modifier:
                     # case of string with reserved length
                     # if string is shorter than reservation, then empty spaces will be filled with spaces
