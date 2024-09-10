@@ -21,16 +21,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @unique
-class ConfigKey(Enum):
+class ConfigField(Enum):
     GENERAL = "general"
     GENITEM = "item"
-    SITE = "site"
 
-
-@unique
-class ConfigField(Enum):
-    TRAYICON = "trayicon"
-    GENLOOP = "genloop"
     STARTUPDELAY = "startupdelay"
     STARTSERVER = "startserver"
     PORT = "port"
@@ -43,11 +37,6 @@ class ConfigField(Enum):
     ENABLED = "enabled"
     GEN_PARAMS = "params"
 
-    AUTH_TYPE = "type"
-    AUTH_LOGIN = "login"  # nosec
-    AUTH_PASS = "pass"  # nosec
-    AUTH_ITEMURL = "itemurl"  # nosec
-
 
 # ==================================================
 
@@ -58,7 +47,7 @@ def load_config(config_path):
         return config_dict
 
     # set default value of data directory if not set
-    general_section = config_dict.get(ConfigKey.GENERAL.value, {})
+    general_section = config_dict.get(ConfigField.GENERAL.value, {})
     data_root = general_section.get(ConfigField.DATAROOT.value)
     data_root = specify_dir(data_root, config_path, "data")
     general_section[ConfigField.DATAROOT.value] = data_root

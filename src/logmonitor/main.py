@@ -42,7 +42,7 @@ import time
 import subprocess  # nosec
 
 from logmonitor import logger
-from logmonitor.configfileyaml import load_config, ConfigKey, ConfigField
+from logmonitor.configfileyaml import load_config, ConfigField
 from logmonitor.rss.rssmanager import ThreadedRSSManager, RSSManager
 from logmonitor.rss.rssserver import RSSServerManager
 from logmonitor.systray.traymanager import TrayManager
@@ -65,14 +65,13 @@ def open_log(log_viewer, log_path):
 def start_with_tray(parameters):
     if parameters is None:
         parameters = {}
-    general_section = parameters.get(ConfigKey.GENERAL.value, {})
+    general_section = parameters.get(ConfigField.GENERAL.value, {})
     data_root = general_section.get(ConfigField.DATAROOT.value)
     log_dir = general_section.get(ConfigField.LOGDIR.value, "")
     log_viewer = general_section.get(ConfigField.LOGVIEWER.value)
     refresh_time = general_section.get(ConfigField.REFRESHTIME.value, 3600)
     start_server = general_section.get(ConfigField.STARTSERVER.value, True)
     rss_port = general_section.get(ConfigField.PORT.value, 8080)
-    genloop = general_section.get(ConfigField.GENLOOP.value, True)
     startupdelay = general_section.get(ConfigField.STARTUPDELAY.value, 0)
 
     tray_manager = TrayManager(server_state=start_server)
@@ -101,17 +100,9 @@ def start_with_tray(parameters):
     # data generation main loop
     exit_code = 0
     try:
-        if genloop:
-            # run in loop
-            threaded_manager.start(refresh_time, startupdelay)
-            tray_manager.run_loop()  # run tray main loop
-        else:
-            # generate data only once
-            _LOGGER.info("generating RSS data only once")
-            if startupdelay > 0:
-                _LOGGER.info("waiting %s seconds (startup delay)", startupdelay)
-                time.sleep(startupdelay)
-            manager.generate_data()
+        # run in loop
+        threaded_manager.start(refresh_time, startupdelay)
+        tray_manager.run_loop()  # run tray main loop
 
     except KeyboardInterrupt:
         _LOGGER.info("keyboard interrupt detected - stopping")
@@ -131,7 +122,7 @@ def start_with_tray(parameters):
 
 def generate_data(parameters):
     """Start raw generation loop."""
-    general_section = parameters.get(ConfigKey.GENERAL.value, {})
+    general_section = parameters.get(ConfigField.GENERAL.value, {})
     startupdelay = general_section.get(ConfigField.STARTUPDELAY.value, 0)
 
     manager = RSSManager(parameters)
@@ -173,7 +164,7 @@ def process_generate(args):
     parameters = load_config(args.config)
 
     if args.startupdelay is not None:
-        general_section = parameters.get(ConfigKey.GENERAL.value, {})
+        general_section = parameters.get(ConfigField.GENERAL.value, {})
         general_section[ConfigField.STARTUPDELAY.value] = args.startupdelay
 
     exit_code = generate_data(parameters)

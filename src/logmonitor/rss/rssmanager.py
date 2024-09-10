@@ -12,7 +12,7 @@ from typing import Dict, List, Tuple
 import threading
 
 from logmonitor.utils import save_recent_date, get_recent_date, write_data
-from logmonitor.configfileyaml import ConfigField, ConfigKey
+from logmonitor.configfileyaml import ConfigField
 from logmonitor.rss.generator.rssgenerator import RSSGenerator
 from logmonitor.rss.generator.logginggen import LoggingGenerator
 
@@ -112,7 +112,7 @@ class RSSManager:
     def _initialize_generators(self):
         self._generators = []
 
-        gen_items = self._params.get(ConfigKey.GENITEM.value, [])  # list of dicts
+        gen_items = self._params.get(ConfigField.GENITEM.value, [])  # list of dicts
         if not gen_items:
             _LOGGER.warning("could not get generators configuration")
             return
@@ -144,7 +144,7 @@ class RSSManager:
     def _write_data(self, generator_id, generator_data: Dict[str, str]):
         if not generator_data:
             return
-        data_root_dir = self._params.get(ConfigKey.GENERAL.value, {}).get(ConfigField.DATAROOT.value)
+        data_root_dir = self._params.get(ConfigField.GENERAL.value, {}).get(ConfigField.DATAROOT.value)
         for rss_out, content in generator_data.items():
             out_dir = os.path.join(data_root_dir, generator_id)
             feed_path = os.path.join(out_dir, rss_out)

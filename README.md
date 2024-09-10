@@ -27,7 +27,6 @@ There is [example configuration file](examples/config_example.yaml) in examples.
 
 general:
     trayicon: true             # enable or disable tray icon
-    genloop: true              # enable or disable RSS generation loop (if set to 'false' then generation will be triggered only once)
     startupdelay: 15           # set delay in seconds before first generation (useful on startup to wait for KeePassXC to start before) 
     startserver: true          # set 'false' to prevent starting RSS server (just store data to local files), default: true
     port: 8080                 # RSS feed port, default 8080
