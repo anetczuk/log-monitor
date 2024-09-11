@@ -1,23 +1,23 @@
 #!/bin/bash
 
-#set -eu
-set -u
+set -eu
+#set -u
 
 
 ## works both under bash and sh
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
 
-src_dir=$SCRIPT_DIR/../src
+src_dir="$SCRIPT_DIR/../src"
 
-examples_dir=$SCRIPT_DIR/../examples
+examples_dir="$SCRIPT_DIR/../examples"
 if [ ! -d "$examples_dir" ]; then
     examples_dir=""
 fi
 
 
 echo "running black"
-black --line-length=120 $src_dir $examples_dir $SCRIPT_DIR
+black --line-length=120 "$src_dir" "$examples_dir" "$SCRIPT_DIR"
 exit_code=$?
 
 if [ $exit_code -ne 0 ]; then
@@ -45,7 +45,7 @@ ignore_errors=E115,E126,E201,E202,E221,E241,E262,E265,E266,E402,E501,W391,D
 
 echo "running pycodestyle"
 echo "to ignore warning inline add comment at the end of line: # noqa"
-pycodestyle --show-source --statistics --count --ignore=$ignore_errors $src_dir $examples_dir $SCRIPT_DIR
+pycodestyle --show-source --statistics --count --ignore="$ignore_errors" "$src_dir" "$examples_dir" "$SCRIPT_DIR"
 exit_code=$?
 
 if [ $exit_code -ne 0 ]; then
@@ -60,7 +60,7 @@ ignore_errors=$ignore_errors,F401
 
 
 echo "running flake8"
-python3 -m flake8 --show-source --statistics --count --ignore=$ignore_errors $src_dir $examples_dir $SCRIPT_DIR
+python3 -m flake8 --show-source --statistics --count --ignore="$ignore_errors" "$src_dir" "$examples_dir" "$SCRIPT_DIR"
 exit_code=$?
 
 if [ $exit_code -ne 0 ]; then
@@ -79,7 +79,8 @@ src_files=$(find "$src_dir" -type f -name "*.py")
 echo "running pylint3"
 echo "to ignore warning for module put following line on top of file: # pylint: disable=<check_id>"
 echo "to ignore warning for one line put following comment in end of line: # pylint: disable=<check_id>"
-pylint --rcfile=$SCRIPT_DIR/pylint3.config $src_files $example_files $tools_files
+# shellcheck disable=SC2086
+pylint --rcfile="$SCRIPT_DIR/pylint3.config" $src_files $example_files $tools_files
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
     exit $exit_code
@@ -95,7 +96,8 @@ echo "to ignore warning for one line put following comment in end of line: # nos
 skip_list="B301,B403"
 
 #echo "to ignore warning for one line put following comment in end of line: # nosec
-bandit --skip "${skip_list}" -r $src_dir $example_files $SCRIPT_DIR -x "$src_dir/test*"
+# shellcheck disable=SC2086
+bandit --skip "${skip_list}" -r "$src_dir" $example_files "$SCRIPT_DIR" -x "$src_dir/test*"
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
     exit $exit_code
@@ -106,7 +108,7 @@ echo "bandit -- no warnings found"
 req_path="$src_dir/requirements.txt"
 if [ -f "$req_path" ]; then
     echo "running safety"
-    safety check -r $req_path
+    safety check -r "$req_path"
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
         exit $exit_code
@@ -115,3 +117,18 @@ if [ -f "$req_path" ]; then
 else
     echo "skipping safety - no requirements file found"
 fi
+
+
+## check shell scripts
+
+found_files=$(find "$src_dir/../" -not -path "*/venv/*" -type f -name '*.sh' -o -name '*.bash')
+
+## SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
+EXCLUDE_LIST="SC2129"
+
+echo "to suppress line warning add before the line: # shellcheck disable=<code>"
+# shellcheck disable=SC2068
+shellcheck -a -x --exclude "$EXCLUDE_LIST" ${found_files[@]}
+echo "shellcheck -- no warnings found"
+
+echo -e "\nall checks completed"

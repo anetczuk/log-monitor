@@ -20,7 +20,7 @@ while :; do
     case "$1" in
       --no-prompt)  NO_PROMPT=true 
                     shift ;;
-      *)  ARGS+=($1)
+      *)  ARGS+=("$1")
           shift ;;
     esac
 done
@@ -58,13 +58,14 @@ VENV_DIR=$(realpath "$VENV_DIR")
 
 echo "Creating virtual environment in $VENV_DIR"
 
-python3.8 -m venv $VENV_DIR
+python3.8 -m venv "$VENV_DIR"
 # python3 -m venv $VENV_DIR
 # python2 -m virtualenv $VENV_DIR
 
 
 ### creating venv start script
 
+# shellcheck disable=SC2016
 SCRIPT_CONTENT='#!/bin/bash
 
 ##
@@ -114,6 +115,7 @@ bash -i <<< "source $tmpfile"
 rm $tmpfile
 '
 
+# shellcheck disable=SC2016
 SCRIPT_CONTENT="${SCRIPT_CONTENT//'$VENV_ROOT_DIR'/$VENV_DIR}"
 SCRIPT_PATH="$VENV_DIR/activatevenv.sh"
 START_VENV_SCRIPT_PATH="$SCRIPT_PATH"

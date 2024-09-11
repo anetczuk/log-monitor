@@ -29,7 +29,7 @@ class LoggingGenerator(RSSGenerator):
     def generate(self) -> Dict[str, str]:
         log_list = self.parser.parse_file(self.logfile)
 
-        feed_gen = init_feed_gen("http://not.set")      # have to be semantically valid
+        feed_gen = init_feed_gen("http://not.set")  # have to be semantically valid
         feed_gen.title(self.logname)
         feed_gen.description(self.logname)
 
@@ -63,7 +63,7 @@ class LoggingGenerator(RSSGenerator):
         feed_item.author({"name": self.logname, "email": self.logname})
 
         # fill description
-        content = f""" 
+        content = f"""
 <div>
 <pre>
 {raw_log}
