@@ -1,11 +1,12 @@
 #!/bin/bash
 
+set -eu
 
 ## works both under bash and sh
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
 
-EXEC_PATH="$SCRIPT_DIR/logmonitor/main.py"
+EXEC_PATH="$SCRIPT_DIR/logmonitor/main.py start"
 CONFIG_PATH=""
 
 ARGS=()
@@ -30,8 +31,10 @@ done
 
 
 ## add udev rule
-CONFIG_FILE=~/.config/autostart/log-monitor.desktop
+AUTOSTART_DIR=~/.config/autostart
+AUTOSTART_FILE=$AUTOSTART_DIR/log-monitor.desktop
 
+mkdir -p $AUTOSTART_DIR
 
 if [ "$CONFIG_PATH" != "" ]; then
     EXEC_PATH="$EXEC_PATH -c $CONFIG_PATH"
@@ -42,7 +45,7 @@ else
 fi
 
 
-cat > $CONFIG_FILE << EOL
+cat > $AUTOSTART_FILE << EOL
 [Desktop Entry]
 Name=Log Monitor
 GenericName=Log Monitor
@@ -57,4 +60,4 @@ X-GNOME-Autostart-enabled=true
 EOL
 
 
-echo "File created in: $CONFIG_FILE"
+echo "File created in: $AUTOSTART_FILE"

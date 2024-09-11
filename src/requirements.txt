@@ -2,5 +2,5 @@ PyYAML
 pygrok
 appdirs>=1.4.4
 pytz>=2021.3
-feedgen
-pystray
+feedgen>=0.9.0
+pystray==0.19.5
