@@ -30,7 +30,7 @@ class TrayManagerState(Enum):
 
 
 class TrayManager:
-    def __init__(self, start_enabled=True):
+    def __init__(self, start_enabled=True, black_theme=False):
         self._server_enabled: bool = start_enabled
         self._server_state: TrayManagerState = TrayManagerState.VALID
 
@@ -38,10 +38,16 @@ class TrayManager:
         self.refresh_callback = None
         self.open_log_callback = None
 
-        self.ok_icon_image = load_icon("task-checkmark-icon-w.png")
-        self.processing_icon_image = load_icon("task-sync-icon-w.png")
-        self.disabled_icon_image = load_icon("task-remove-icon-w.png")
-        self.error_icon_image = load_icon("task-error-icon-w.png")
+        if black_theme:
+            self.ok_icon_image = load_icon("task-checkmark-icon-b.png")
+            self.processing_icon_image = load_icon("task-sync-icon-b.png")
+            self.disabled_icon_image = load_icon("task-remove-icon-b.png")
+            self.error_icon_image = load_icon("task-error-icon-b.png")
+        else:
+            self.ok_icon_image = load_icon("task-checkmark-icon-w.png")
+            self.processing_icon_image = load_icon("task-sync-icon-w.png")
+            self.disabled_icon_image = load_icon("task-remove-icon-w.png")
+            self.error_icon_image = load_icon("task-error-icon-w.png")
 
         rss_server_item = pystray.MenuItem(
             "Run RSS Server", self._on_rss_server_clicked, checked=lambda item: self._server_enabled

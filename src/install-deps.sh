@@ -19,7 +19,7 @@ PIP_ARGS=""
 if [[ $* == *--break-system-packages* ]]; then
 	PIP_ARGS="--break-system-packages"
 fi
-pip3 install "$PIP_ARGS" -r "$SCRIPT_DIR/requirements.txt"
+pip3 install $PIP_ARGS -r "$SCRIPT_DIR/requirements.txt"
 
 
 echo -e "\ninstallation done\n"

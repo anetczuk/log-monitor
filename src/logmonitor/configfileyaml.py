@@ -27,6 +27,7 @@ class ConfigField(Enum):
 
     STARTUPDELAY = "startupdelay"
     STARTSERVER = "startserver"
+    ICONTHEME = "icontheme"
     PORT = "port"
     REFRESHTIME = "refreshtime"
     DATAROOT = "dataroot"

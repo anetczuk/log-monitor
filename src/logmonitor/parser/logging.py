@@ -6,9 +6,9 @@
 # LICENSE file in the root directory of this source tree.
 #
 
-from logmonitor.parser.abcparser import ABCParser
-
 from pygrok.pygrok import Grok
+
+from logmonitor.parser.abcparser import ABCParser
 
 
 class LoggingParser(ABCParser):

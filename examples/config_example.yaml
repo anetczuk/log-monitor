@@ -3,6 +3,7 @@
 general:
     startupdelay: 15           # set delay in seconds before first generation (useful on startup to wait for KeePassXC to start before) 
     startserver: true          # set 'false' to prevent starting RSS server (just store data to local files), default: true
+    icontheme: "black"         # color theme of tray icon: black or white
     port: 8080                 # RSS feed port, default 8080
     refreshtime: 3600          # time in seconds between consecutive RSS generator loop iterations, default 3600
     dataroot: "data"           # path to store data; path absolute or relative to config directory

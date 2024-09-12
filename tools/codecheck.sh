@@ -122,6 +122,7 @@ fi
 ## check shell scripts
 
 found_files=$(find "$src_dir/../" -not -path "*/venv/*" -type f -name '*.sh' -o -name '*.bash')
+echo "founs sh files to check: $found_files"
 
 ## SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
 EXCLUDE_LIST="SC2129"
