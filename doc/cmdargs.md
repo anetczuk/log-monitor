@@ -4,7 +4,7 @@ usage: logmonitor.main [-h] [-la] [--listtools] {start,generate} ...
 
 log monitor
 
-optional arguments:
+options:
   -h, --help        show this help message and exit
   -la, --logall     Log all messages
   --listtools       List tools
@@ -25,7 +25,7 @@ usage: logmonitor.main start [-h] [-c CONFIG]
 
 start server
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
                         Path to YAML config file
@@ -39,7 +39,7 @@ usage: logmonitor.main generate [-h] [-c CONFIG] [--startupdelay STARTUPDELAY]
 
 generate data
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
                         Path to YAML config file

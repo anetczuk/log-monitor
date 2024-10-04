@@ -34,7 +34,7 @@ class ConfigField(Enum):
     LOGDIR = "logdir"
     LOGVIEWER = "logviewer"
 
-    PARSER_ID = "parser"
+    PARSER_TYPE = "parser"
     ENABLED = "enabled"
     GEN_PARAMS = "params"
 
