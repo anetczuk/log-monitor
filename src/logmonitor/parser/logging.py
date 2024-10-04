@@ -13,6 +13,9 @@ from logmonitor.parser.abcparser import ABCParser
 
 class LoggingParser(ABCParser):
 
+    # thread name have optional function name, e.g. 'Thread-2 (_runner)'
+    CUSTOM_PATS = {"THREADNAME": "%{NOTSPACE}(?:%{SPACE}%{NOTSPACE})"}
+
     # list prepared based on https://docs.python.org/3/library/logging.html#logrecord-attributes
     TOKENS = {
         "asctime": ("s", "DATA"),
@@ -31,7 +34,7 @@ class LoggingParser(ABCParser):
         "processName": ("s", "NOTSPACE"),
         "relativeCreated": ("d", "NONNEGINT"),
         "thread": ("d", "NONNEGINT"),
-        "threadName": ("s", "NOTSPACE"),
+        "threadName": ("s", "THREADNAME"),
         "taskName": ("s", "NOTSPACE"),
     }
 
@@ -67,17 +70,17 @@ class LoggingParser(ABCParser):
 
         if pattern is None:
             pattern = self.parse_format(fmt)
-        self.grok = Grok(pattern)
+        self.grok = Grok(pattern, custom_patterns=self.CUSTOM_PATS)
 
         self.datetime_grok = None
         if datefmt:
             datetime_pattern = self.parse_datetime(datefmt)
             self.datetime_grok = Grok(datetime_pattern)
 
-    def parse_content(self, content):
+    def parse_content(self, content, file_path=None):
         ret_list = []
         lines = content.splitlines()
-        for raw_line in lines:
+        for line_index, raw_line in enumerate(lines):
             found = self.grok.match(raw_line)
             if found is None:
                 # continuation of multiline log
@@ -85,7 +88,10 @@ class LoggingParser(ABCParser):
                     prev_entry = ret_list[-1]
                     self._append_text(prev_entry, raw_line)
                 else:
-                    raise RuntimeError("unable to match pattern to content")
+                    raise RuntimeError(
+                        f"file {file_path}: unable to match pattern '{self.grok.pattern}'"
+                        f" to line {line_index + 1}: {raw_line}"
+                    )
                 continue
 
             if self.datetime_grok:

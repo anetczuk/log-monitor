@@ -26,8 +26,14 @@ class LoggingGenerator(RSSGenerator):
         self.logfile = logfile
         self.loglevelthreshhold = loglevel
 
+    def get_id(self) -> str:
+        return self.logname
+
     def generate(self) -> Dict[str, str]:
         log_list = self.parser.parse_file(self.logfile)
+        if log_list is None:
+            _LOGGER.info("generator %s file %s does not exist", self.logname, self.logfile)
+            return {self.logname: None}
 
         feed_gen = init_feed_gen("http://not.set")  # have to be semantically valid
         feed_gen.title(self.logname)

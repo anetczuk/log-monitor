@@ -17,6 +17,12 @@ _LOGGER = logging.getLogger(__name__)
 
 #
 class RSSGenerator(ABC):
+
+    @abstractmethod
+    def get_id(self) -> str:
+        """Return generator identifier."""
+        raise NotImplementedError("method not implemented")
+
     @abstractmethod
     def generate(self) -> Dict[str, str]:
         """Grab data and generate RSS feed.

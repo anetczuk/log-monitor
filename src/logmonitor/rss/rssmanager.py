@@ -83,9 +83,10 @@ class RSSManager:
         _LOGGER.info("========== generating RSS data ==========")
         recent_datetime = get_recent_date()
 
-        for gen_id, gen_state in self._generators:
+        for gen_type, gen_state in self._generators:
             gen = gen_state.generator
-
+            gen_name = gen.get_id()
+            _LOGGER.info("----- running generator %s -----", gen_name)
             try:
                 gen_data: Dict[str, str] = gen.generate()
             except Exception:  # pylint: disable=W0703
@@ -94,11 +95,11 @@ class RSSManager:
                 continue
 
             if not gen_data:
-                _LOGGER.info("generation not completed for generator '%s'", gen_id)
+                _LOGGER.info("generation not completed for generator '%s'", gen_type)
                 gen_state.valid = False
             else:
                 gen_state.valid = True
-            self._write_data(gen_id, gen_data)
+            self._write_data(gen_type, gen_data)
 
         save_recent_date(recent_datetime)
         _LOGGER.info("========== generation ended ==========")
@@ -119,26 +120,26 @@ class RSSManager:
             return
 
         for gen_params in gen_items:
-            gen_id = gen_params.get(ConfigField.PARSER_ID.value)
-            if not gen_id:
+            gen_type = gen_params.get(ConfigField.PARSER_TYPE.value)
+            if not gen_type:
                 _LOGGER.warning("unable to get generator id from params: %s", gen_params)
                 continue
             if not gen_params.get(ConfigField.ENABLED.value, True):
-                _LOGGER.warning("generator %s disabled", gen_id)
+                _LOGGER.warning("generator %s disabled", gen_type)
                 continue
 
             try:
                 gen_inner_params = gen_params.get(ConfigField.GEN_PARAMS.value, {})
-                generator: RSSGenerator = get_generator(gen_id, gen_inner_params)
+                generator: RSSGenerator = get_generator(gen_type, gen_inner_params)
                 if not generator:
-                    _LOGGER.warning("unable to get generator %s", gen_id)
+                    _LOGGER.warning("unable to get generator %s", gen_type)
                     continue
                 gen_state = RSSManager.State(generator)
-                self._generators.append((gen_id, gen_state))
+                self._generators.append((gen_type, gen_state))
 
             except Exception as exc:  # pylint: disable=W0703
                 # unable to authenticate - will not be possible to generate content
-                _LOGGER.warning("error during authentication of %s: %s", gen_id, exc)
+                _LOGGER.warning("error during authentication of %s: %s", gen_type, exc)
 
         _LOGGER.info("generators initialized: %s", len(self._generators))
 
@@ -147,6 +148,8 @@ class RSSManager:
             return
         data_root_dir = self._params.get(ConfigField.GENERAL.value, {}).get(ConfigField.DATAROOT.value)
         for rss_out, content in generator_data.items():
+            if content is None:
+                continue
             out_dir = os.path.join(data_root_dir, generator_id)
             feed_path = os.path.join(out_dir, rss_out)
             feed_dir = os.path.dirname(feed_path)
@@ -196,7 +199,7 @@ class ThreadedRSSManager:
             self._execute_loop = False
             try:
                 with self._wait_object:
-                    self._wait_object.notifyAll()
+                    self._wait_object.notifyAll()  # pylint: disable=W4902
             except RuntimeError:
                 # no threads wait for notification
                 _LOGGER.info("thread does not wait")
@@ -218,7 +221,7 @@ class ThreadedRSSManager:
             try:
                 with self._wait_object:
                     _LOGGER.info("waking up RSS thread")
-                    self._wait_object.notifyAll()
+                    self._wait_object.notifyAll()  # pylint: disable=W4902
             except RuntimeError:
                 # no threads wait for notification
                 _LOGGER.info("thread does not wait")

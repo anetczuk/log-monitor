@@ -17,10 +17,13 @@ class ABCParser(ABC):
     def __init__(self):
         pass
 
-    def parse_file(self, file_path):
-        content = read_data(file_path)
-        return self.parse_content(content)
+    def parse_file(self, file_path) -> str:
+        try:
+            content = read_data(file_path)
+            return self.parse_content(content, file_path=file_path)
+        except FileNotFoundError:
+            return None
 
     @abstractmethod
-    def parse_content(self, content):
+    def parse_content(self, content, file_path=None):
         raise NotImplementedError("method not implemented")

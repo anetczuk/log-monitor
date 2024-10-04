@@ -24,7 +24,7 @@ class LoggingParserTest(unittest.TestCase):
         pattern = LoggingParser.parse_format(fmt)
         self.assertEqual(
             pattern,
-            "%{DATA:asctime},%{NONNEGINT:msecs}%{SPACE} %{NOTSPACE:levelname}%{SPACE} %{NOTSPACE:threadName}"
+            "%{DATA:asctime},%{NONNEGINT:msecs}%{SPACE} %{NOTSPACE:levelname}%{SPACE} %{THREADNAME:threadName}"
             " %{NOTSPACE:name}:%{NOTSPACE:funcName} \\[%{NOTSPACE:filename}:%{NONNEGINT:lineno}\\]"
             " %{GREEDYDATA:message}",
         )
@@ -82,6 +82,63 @@ class LoggingParserTest(unittest.TestCase):
             "filename": "main.py",
             "lineno": "89",
             "message": "Starting the application",
+        }
+        self.assertListEqual([[log_content, sort_dict(data)]], response)
+
+    def test_parse_03(self):
+        # thread name with thread function
+
+        self.maxDiff = None
+        parser = LoggingParser(
+            "%(asctime)s,%(msecs)-3d %(levelname)-8s"
+            " %(threadName)s %(name)s:%(funcName)s [%(filename)s:%(lineno)d] %(message)s",
+            "%Y-%m-%d %H:%M:%S",
+        )
+        log_content = (
+            "2024-09-09 20:30:24,86  DEBUG    Thread-2 (_runner) __main__:main [main.py:89] Starting the application"
+        )
+        response = parser.parse_content(log_content)
+        data = {
+            "asctime": {"H": "20", "M": "30", "S": "24", "Y": "2024", "d": "09", "m": "09"},
+            "msecs": "86",
+            "levelname": "DEBUG",
+            "threadName": "Thread-2 (_runner)",
+            "name": "__main__",
+            "funcName": "main",
+            "filename": "main.py",
+            "lineno": "89",
+            "message": "Starting the application",
+        }
+        self.assertListEqual([[log_content, sort_dict(data)]], response)
+
+    def test_parse_optional(self):
+        # log entry to test optional thread function
+
+        self.maxDiff = None
+        parser = LoggingParser(
+            datefmt="%Y-%m-%d %H:%M:%S",
+            pattern=r"%{DATA:asctime},%{NONNEGINT:msecs}%{SPACE} %{NOTSPACE:levelname}%{SPACE} "
+            r"%{NOTSPACE:threadName}(?:%{SPACE}\(%{NOTSPACE:threadFunction}\)) %{NOTSPACE:name}:%{NOTSPACE:funcName}"
+            r" \[%{NOTSPACE:filename}:%{NONNEGINT:lineno}\] %{GREEDYDATA:message}",
+        )
+        log_content = (
+            "2024-10-04 15:09:57,773 INFO     Thread-2 (_runLoop) rssforward.site.pracujpl:add_offer"
+            " [pracujpl.py:111] getting offer details:"
+            " https://www.pracuj.pl/praca/c%2b%2b-senior-developer-warszawa,oferta,1003608626"
+        )
+        response = parser.parse_content(log_content)
+        data = {
+            "asctime": {"H": "15", "M": "09", "S": "57", "Y": "2024", "d": "04", "m": "10"},
+            "msecs": "773",
+            "levelname": "INFO",
+            "threadName": "Thread-2",
+            "threadFunction": "_runLoop",
+            "name": "rssforward.site.pracujpl",
+            "funcName": "add_offer",
+            "filename": "pracujpl.py",
+            "lineno": "111",
+            "message": "getting offer details: "
+            "https://www.pracuj.pl/praca/c%2b%2b-senior-developer-warszawa,oferta,1003608626",
         }
         self.assertListEqual([[log_content, sort_dict(data)]], response)
 
