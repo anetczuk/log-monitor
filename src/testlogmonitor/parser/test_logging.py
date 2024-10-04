@@ -6,9 +6,15 @@
 # LICENSE file in the root directory of this source tree.
 #
 
+import os
 import unittest
 
 from logmonitor.parser.logging import LoggingParser
+
+from testlogmonitor.data import get_data_path
+
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def sort_dict(data_dict):
@@ -165,3 +171,30 @@ class LoggingParserTest(unittest.TestCase):
             "message": "downloading completed\nsecond log line\nthird log line",
         }
         self.assertListEqual([[log_content, sort_dict(data)]], response)
+
+    def test_parse_traceback(self):
+        self.maxDiff = None
+        parser = LoggingParser(
+            "%(asctime)s,%(msecs)-3d %(levelname)-8s"
+            " %(threadName)s %(name)s:%(funcName)s [%(filename)s:%(lineno)d] %(message)s"
+        )
+        log_pagh = get_data_path("log_trace.txt")
+        response = parser.parse_file(log_pagh)
+
+        self.assertEqual(4, len(response))
+        line_dict = response[0][1]
+        self.assertEqual("writing logging content to file: /tmp/application", line_dict["message"])
+
+        line_dict = response[1][1]
+        message = line_dict["message"]
+        message_lines = message.split("\n")
+        self.assertEqual("exception raised during generator execution", message_lines[0])
+        self.assertEqual(
+            """RuntimeError: file /tmplog/log.txt: unable to match pattern to line 1: """
+            """2024-10-04 15:09:57,773 INFO     Thread-2 (_runLoop) package:add_offer [google.py:111] """
+            """getting offer details: https://www.google.com""",
+            message_lines[-1],
+        )
+
+        line_dict = response[2][1]
+        self.assertEqual("found 5556 items", line_dict["message"])

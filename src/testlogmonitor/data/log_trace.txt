@@ -1,0 +1,17 @@
+2024-10-04 19:13:38,310 INFO     MainThread logmonitor.rss.rssmanager:_write_data [rssmanager.py:154] writing logging content to file: /tmp/application
+2024-10-04 19:13:38,311 ERROR    MainThread logmonitor.rss.rssmanager:generate_data [rssmanager.py:92] exception raised during generator execution
+Traceback (most recent call last):
+  File "/tmp/log-monitor/src/logmonitor/rss/rssmanager.py", line 90, in generate_data
+    gen_data: Dict[str, str] = gen.generate()
+                               ^^^^^^^^^^^^^^
+  File "/tmp/log-monitor/src/logmonitor/rss/generator/logginggen.py", line 30, in generate
+    log_list = self.parser.parse_file(self.logfile)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/log-monitor/src/logmonitor/parser/abcparser.py", line 22, in parse_file
+    return self.parse_content(content, file_path=file_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/log-monitor/src/logmonitor/parser/logging.py", line 88, in parse_content
+    raise RuntimeError(f"file {file_path}: unable to match pattern to line {line_index+1}: {raw_line}")
+RuntimeError: file /tmplog/log.txt: unable to match pattern to line 1: 2024-10-04 15:09:57,773 INFO     Thread-2 (_runLoop) package:add_offer [google.py:111] getting offer details: https://www.google.com
+2024-10-04 19:13:38,404 INFO     MainThread logmonitor.rss.generator.logginggen:generate [logginggen.py:36] found 5556 items
+2024-10-04 19:13:38,406 INFO     MainThread logmonitor.rss.utils:dumps_feed_gen [utils.py:26] generating 6 feed items

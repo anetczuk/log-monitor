@@ -80,8 +80,17 @@ class LoggingParser(ABCParser):
     def parse_content(self, content, file_path=None):
         ret_list = []
         lines = content.splitlines()
+        raise_detected = False  # if true then append next line
         for line_index, raw_line in enumerate(lines):
-            found = self.grok.match(raw_line)
+            found = None
+            if raise_detected:
+                # next line after raise - line with exception log
+                raise_detected = False
+            elif raw_line.startswith("    raise "):
+                # raise line
+                raise_detected = True
+            else:
+                found = self.grok.match(raw_line)
             if found is None:
                 # continuation of multiline log
                 if ret_list:
