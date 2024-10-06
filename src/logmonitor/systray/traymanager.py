@@ -91,11 +91,6 @@ class TrayManager:
         self._set_icon()
 
     def _set_icon(self):
-        if not self._server_enabled:
-            _LOGGER.info("server disabled - setting disabled icon")
-            self.tray_icon.icon = self.disabled_icon_image
-            return
-
         if self._server_state == TrayManagerState.ERROR:
             _LOGGER.info("error detected - setting error icon")
             self.tray_icon.icon = self.error_icon_image
@@ -103,6 +98,11 @@ class TrayManager:
         if self._server_state == TrayManagerState.PROCESSING:
             _LOGGER.info("processing - setting processing icon")
             self.tray_icon.icon = self.processing_icon_image
+            return
+
+        if not self._server_enabled:
+            _LOGGER.info("server disabled - setting disabled icon")
+            self.tray_icon.icon = self.disabled_icon_image
             return
 
         _LOGGER.info("server operational - setting OK icon")

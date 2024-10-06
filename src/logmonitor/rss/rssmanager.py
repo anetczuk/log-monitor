@@ -16,12 +16,13 @@ from logmonitor.utils import save_recent_date, get_recent_date, write_data
 from logmonitor.configfileyaml import ConfigField
 from logmonitor.rss.generator.rssgenerator import RSSGenerator
 from logmonitor.rss.generator.logginggen import LoggingGenerator
+from logmonitor.rss.generator.pytracebackgen import PyTracebackGenerator
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-GENERATOR_DICT = {"logging": LoggingGenerator}
+GENERATOR_DICT = {"logging": LoggingGenerator, "pytraceback": PyTracebackGenerator}
 
 
 def get_generator(generator_id, generator_params_dict=None) -> RSSGenerator:

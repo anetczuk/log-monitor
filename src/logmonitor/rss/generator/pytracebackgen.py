@@ -8,23 +8,23 @@
 
 import logging
 from typing import Dict
+import datetime
 
 from logmonitor.rss.generator.rssgenerator import RSSGenerator
-from logmonitor.parser.loggingparser import LoggingParser
 from logmonitor.rss.utils import init_feed_gen, dumps_feed_gen
-from logmonitor.utils import calculate_hash, string_iso_to_date
+from logmonitor.utils import add_timezone
+from logmonitor.parser.pytracebackparser import PyTracebackParser
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class LoggingGenerator(RSSGenerator):
-    def __init__(self, name=None, logfile=None, loglevel=None, **kwargs):
+class PyTracebackGenerator(RSSGenerator):
+    def __init__(self, name=None, logfile=None, **_kwargs):
         super().__init__()
-        self.parser = LoggingParser(**kwargs)
+        self.parser = PyTracebackParser()
         self.logname = name
         self.logfile = logfile
-        self.loglevelthreshhold = loglevel
 
     def get_id(self) -> str:
         return self.logname
@@ -47,26 +47,20 @@ class LoggingGenerator(RSSGenerator):
         return {self.logname: content}
 
     def _add_log_entry(self, feed_gen, data_entry):
-        raw_log_entry = data_entry[0]
-        data_dict = data_entry[1]
+        mod_time = data_entry[0]
+        log_hash = data_entry[1]
+        msg_list = data_entry[2]
+        exception = msg_list[-1]
 
-        levelname = data_dict["levelname"]
-        if not self._check_loglevel(levelname):
-            return
-
-        filename = data_dict["filename"]
-        log_datetime_data = data_dict["asctime"]
-        log_datetime = get_log_date(log_datetime_data)
+        datestamp = datetime.datetime.fromtimestamp(mod_time)
+        log_datetime = add_timezone(datestamp)
 
         feed_item = feed_gen.add_entry()
-
-        # calculating hash from data dict is "fragile"
-        # log_hash = calculate_dict_hash(data_dict)
-        log_hash = calculate_hash(raw_log_entry)
         feed_item.id(log_hash)
-
-        feed_item.title(f"{self.logname}: {levelname} - {filename}")
+        feed_item.title(f"{self.logname}: {exception}")
         feed_item.author({"name": self.logname, "email": self.logname})
+
+        raw_log_entry = "\n".join(msg_list)
 
         # fill description
         content = f"""
@@ -82,22 +76,3 @@ class LoggingGenerator(RSSGenerator):
         feed_item.pubDate(log_datetime)
         # feed_item.link(href=desc_url, rel="alternate")
         # feed_item.link( href=desc_url, rel='via')        # does not work in thunderbird
-
-    def _check_loglevel(self, entry_level) -> bool:
-        curr_priority = get_log_priority(entry_level)
-        threshold_priority = get_log_priority(self.loglevelthreshhold)
-        return curr_priority >= threshold_priority
-
-
-def get_log_date(date_dict):
-    datetime_string = (
-        f"{date_dict['Y']}-{date_dict['m']}-{date_dict['d']} {date_dict['H']}:{date_dict['M']}:{date_dict['S']}"
-    )
-    return string_iso_to_date(datetime_string)
-
-
-LEVEL_MAPPING = {None: 0, "DEBUG": 10, "INFO": 20, "WARNING": 30, "ERROR": 40, "CRITICAL": 50}
-
-
-def get_log_priority(level_name):
-    return LEVEL_MAPPING[level_name]

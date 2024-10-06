@@ -6,6 +6,7 @@
 # LICENSE file in the root directory of this source tree.
 #
 
+from typing import List, Any
 from pygrok.pygrok import Grok
 
 from logmonitor.parser.abcparser import ABCParser
@@ -77,8 +78,8 @@ class LoggingParser(ABCParser):
             datetime_pattern = self.parse_datetime(datefmt)
             self.datetime_grok = Grok(datetime_pattern)
 
-    def parse_content(self, content, file_path=None):
-        ret_list = []
+    def parse_content(self, content, file_path=None) -> List[Any]:
+        ret_list: List[Any] = []
         lines = content.splitlines()
         raise_detected = False  # if true then append next line
         for line_index, raw_line in enumerate(lines):

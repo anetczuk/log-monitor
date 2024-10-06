@@ -9,7 +9,7 @@
 import os
 import unittest
 
-from logmonitor.parser.logging import LoggingParser
+from logmonitor.parser.loggingparser import LoggingParser
 
 from testlogmonitor.data import get_data_path
 
