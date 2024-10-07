@@ -8,33 +8,17 @@
 
 import os
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from enum import Enum, auto, unique
 import threading
 
 from logmonitor.utils import save_recent_date, get_recent_date, write_data
 from logmonitor.configfileyaml import ConfigField
 from logmonitor.rss.generator.rssgenerator import RSSGenerator
-from logmonitor.rss.generator.logginggen import LoggingGenerator
-from logmonitor.rss.generator.pytracebackgen import PyTracebackGenerator
+from logmonitor.rss.generatorspawn import spawn_generator_from_cfg
 
 
 _LOGGER = logging.getLogger(__name__)
-
-
-GENERATOR_DICT = {"logging": LoggingGenerator, "pytraceback": PyTracebackGenerator}
-
-
-def get_generator(generator_id, generator_params_dict=None) -> RSSGenerator:
-    generator = GENERATOR_DICT.get(generator_id)
-    if generator is None:
-        _LOGGER.warning("unable to load generator %s", generator_id)
-        return None
-    try:
-        return generator(**generator_params_dict)
-    except BaseException:
-        _LOGGER.exception("unable to load generator %s", generator_id)
-        return None
 
 
 # =========================================================================
@@ -45,8 +29,9 @@ class RSSManager:
     class State:
         """Container for generator and it's state."""
 
-        def __init__(self, generator: RSSGenerator = None):
+        def __init__(self, gentype, generator: RSSGenerator = None):
             self.generator: RSSGenerator = generator
+            self.type = gentype
             self.valid = True  # answers question: is problem with generator?
 
     # =================================
@@ -55,7 +40,7 @@ class RSSManager:
         if parameters is None:
             parameters = {}
         self._params = parameters.copy()
-        self._generators: List[Tuple[str, RSSManager.State]] = None
+        self._generators: List[RSSManager.State] = None
 
     def is_gen_valid(self):
         """Check if all generators are valid.
@@ -66,9 +51,10 @@ class RSSManager:
             # not initialized
             _LOGGER.warning("invalid state - no generators")
             return False
-        for gen_id, gen_state in self._generators:
+        for gen_state in self._generators:
+            gen_type = gen_state.type
             if not gen_state.valid:
-                _LOGGER.warning("invalid generator: %s", gen_id)
+                _LOGGER.warning("invalid generator: %s", gen_type)
                 return False
         # everything ok
         return True
@@ -84,9 +70,10 @@ class RSSManager:
         _LOGGER.info("========== generating RSS data ==========")
         recent_datetime = get_recent_date()
 
-        for gen_type, gen_state in self._generators:
+        for gen_state in self._generators:
+            gen_type = gen_state.type
             gen = gen_state.generator
-            gen_name = gen.get_id()
+            gen_name = gen.get_name()
             _LOGGER.info("----- running generator %s -----", gen_name)
             try:
                 gen_data: Dict[str, str] = gen.generate()
@@ -107,8 +94,7 @@ class RSSManager:
 
     def close(self):
         if self._generators:
-            for gen_pair in self._generators:
-                gen_state = gen_pair[1]
+            for gen_state in self._generators:
                 gen = gen_state.generator
                 gen.close()
 
@@ -121,41 +107,24 @@ class RSSManager:
             return
 
         for gen_params in gen_items:
-            gen_type = gen_params.get(ConfigField.PARSER_TYPE.value)
-            if not gen_type:
-                _LOGGER.warning("unable to get generator id from params: %s", gen_params)
-                continue
-            if not gen_params.get(ConfigField.ENABLED.value, True):
-                _LOGGER.warning("generator %s disabled", gen_type)
-                continue
-
-            try:
-                gen_inner_params = gen_params.get(ConfigField.GEN_PARAMS.value, {})
-                generator: RSSGenerator = get_generator(gen_type, gen_inner_params)
-                if not generator:
-                    _LOGGER.warning("unable to get generator %s", gen_type)
-                    continue
-                gen_state = RSSManager.State(generator)
-                self._generators.append((gen_type, gen_state))
-
-            except Exception as exc:  # pylint: disable=W0703
-                # unable to authenticate - will not be possible to generate content
-                _LOGGER.warning("error during authentication of %s: %s", gen_type, exc)
+            gen_state = spawn_generator_from_cfg(gen_params)
+            if gen_state is not None:
+                state = RSSManager.State(*gen_state)
+                self._generators.append(state)
 
         _LOGGER.info("generators initialized: %s", len(self._generators))
 
-    def _write_data(self, generator_id, generator_data: Dict[str, str]):
+    def _write_data(self, generator_type, generator_data: Dict[str, str]):
         if not generator_data:
             return
         data_root_dir = self._params.get(ConfigField.GENERAL.value, {}).get(ConfigField.DATAROOT.value)
         for rss_out, content in generator_data.items():
             if content is None:
                 continue
-            out_dir = os.path.join(data_root_dir, generator_id)
-            feed_path = os.path.join(out_dir, rss_out)
+            feed_path = os.path.join(data_root_dir, rss_out)
             feed_dir = os.path.dirname(feed_path)
             os.makedirs(feed_dir, exist_ok=True)
-            _LOGGER.info("writing %s content to file: %s", generator_id, feed_path)
+            _LOGGER.info("writing %s content to file: %s", generator_type, feed_path)
             write_data(feed_path, content)
 
 

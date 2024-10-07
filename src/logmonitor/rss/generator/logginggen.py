@@ -7,11 +7,12 @@
 #
 
 import logging
-from typing import Dict
+
+from feedgen.feed import FeedGenerator
 
 from logmonitor.rss.generator.rssgenerator import RSSGenerator
 from logmonitor.parser.loggingparser import LoggingParser
-from logmonitor.rss.utils import init_feed_gen, dumps_feed_gen
+from logmonitor.rss.utils import init_feed_gen
 from logmonitor.utils import calculate_hash, string_iso_to_date
 
 
@@ -19,32 +20,31 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class LoggingGenerator(RSSGenerator):
-    def __init__(self, name=None, logfile=None, loglevel=None, **kwargs):
-        super().__init__()
+    def __init__(self, name=None, outfile=None, logfile=None, loglevel=None, **kwargs):
+        super().__init__(outfile)
         self.parser = LoggingParser(**kwargs)
-        self.logname = name
+        self.name = name
         self.logfile = logfile
         self.loglevelthreshhold = loglevel
 
-    def get_id(self) -> str:
-        return self.logname
+    def get_name(self) -> str:
+        return self.name
 
-    def generate(self) -> Dict[str, str]:
+    def generate_feed(self) -> FeedGenerator:
         log_list = self.parser.parse_file(self.logfile)
         if log_list is None:
-            _LOGGER.info("generator %s file %s does not exist", self.logname, self.logfile)
-            return {self.logname: None}
+            _LOGGER.info("generator %s file %s does not exist", self.outfile, self.logfile)
+            return {self.outfile: None}
 
         feed_gen = init_feed_gen("http://not.set")  # have to be semantically valid
-        feed_gen.title(self.logname)
-        feed_gen.description(self.logname)
+        feed_gen.title(self.outfile)
+        feed_gen.description(self.outfile)
 
-        _LOGGER.info("found %s items", len(log_list))
+        _LOGGER.info("found %s entries", len(log_list))
         for entry in log_list:
             self._add_log_entry(feed_gen, entry)
 
-        content = dumps_feed_gen(feed_gen)
-        return {self.logname: content}
+        return feed_gen
 
     def _add_log_entry(self, feed_gen, data_entry):
         raw_log_entry = data_entry[0]
@@ -65,8 +65,8 @@ class LoggingGenerator(RSSGenerator):
         log_hash = calculate_hash(raw_log_entry)
         feed_item.id(log_hash)
 
-        feed_item.title(f"{self.logname}: {levelname} - {filename}")
-        feed_item.author({"name": self.logname, "email": self.logname})
+        feed_item.title(f"{self.name}: {levelname} - {filename}")
+        feed_item.author({"name": self.name, "email": self.name})
 
         # fill description
         content = f"""

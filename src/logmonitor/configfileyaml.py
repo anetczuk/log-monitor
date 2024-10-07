@@ -35,6 +35,8 @@ class ConfigField(Enum):
     LOGVIEWER = "logviewer"
 
     PARSER_TYPE = "parser"
+    LABEL = "label"
+    OUTFILE = "outfile"
     ENABLED = "enabled"
     GEN_PARAMS = "params"
 

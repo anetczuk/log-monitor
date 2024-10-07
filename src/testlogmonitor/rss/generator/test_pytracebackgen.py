@@ -24,8 +24,8 @@ class PyTracebackGeneratorTest(unittest.TestCase):
 
     def test_parse_traceback(self):
         log_path = get_data_path("log_trace.txt")
-        generator = PyTracebackGenerator("testgen", log_path)
+        generator = PyTracebackGenerator("testgen", "outtraces.xml", log_path)
         gen_data = generator.generate()
-        self.assertEqual({"testgen"}, gen_data.keys())
-        content = gen_data["testgen"]
-        self.assertEqual(2002, len(content))
+        self.assertEqual({"outtraces.xml"}, gen_data.keys())
+        content = gen_data["outtraces.xml"]
+        self.assertEqual(2014, len(content))
