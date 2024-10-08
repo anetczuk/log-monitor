@@ -21,6 +21,7 @@ class PyTracebackParser(ABCParser):
         ret_list = []
         lines = content.splitlines()
         traceback_content = None
+        reason_line = False
         for line_index, raw_line in enumerate(lines):
             if raw_line == self.FIRST_LINE:
                 # traceback first line
@@ -31,15 +32,21 @@ class PyTracebackParser(ABCParser):
                 # no traceback state
                 continue
 
-            traceback_content.append(raw_line)
-
-            if raw_line.startswith("  ") is False:
-                # traceback last line
-                mod_time = os.path.getmtime(file_path)
-                prev_lines = lines[: line_index + 1]
-                prev_content = "\n".join(prev_lines)
-                lines_md5 = calculate_hash(prev_content)
-                ret_list.append([mod_time, lines_md5, traceback_content])
-                traceback_content = None
+            if raw_line.startswith("  "):
+                traceback_content.append(raw_line)
+            else:
+                if reason_line is False:
+                    # traceback message with reason - there may be hint data
+                    traceback_content.append(raw_line)
+                    reason_line = True
+                else:
+                    # no more traceback data
+                    mod_time = os.path.getmtime(file_path)
+                    prev_lines = lines[: line_index + 1]
+                    prev_content = "\n".join(prev_lines)
+                    lines_md5 = calculate_hash(prev_content)
+                    ret_list.append([mod_time, lines_md5, traceback_content])
+                    reason_line = False
+                    traceback_content = None
 
         return ret_list

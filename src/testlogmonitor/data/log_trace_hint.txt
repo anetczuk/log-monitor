@@ -1,0 +1,29 @@
+2024-10-03 20:22:43,170 ERROR    MainThread hanlendar.main:start [main.py:118] Exception occurred
+Traceback (most recent call last):
+  File "/media/hdd-stuff/home/bob/Stuff/python/hanlendar/src/hanlendar/main.py", line 115, in start
+    exitCode = run_app( args )
+               ^^^^^^^^^^^^^^^
+  File "/media/hdd-stuff/home/bob/Stuff/python/hanlendar/src/hanlendar/main.py", line 72, in run_app
+    window = MainWindow()
+             ^^^^^^^^^^^^
+  File "/media/hdd-stuff/home/bob/Stuff/python/hanlendar/src/hanlendar/gui/main_window.py", line 208, in __init__
+    self.applySettings()
+  File "/media/hdd-stuff/home/bob/Stuff/python/hanlendar/src/hanlendar/gui/main_window.py", line 513, in applySettings
+    self.loadData()
+  File "/media/hdd-stuff/home/bob/Stuff/python/hanlendar/src/hanlendar/gui/main_window.py", line 255, in loadData
+    self.refreshView()
+  File "/media/hdd-stuff/home/bob/Stuff/python/hanlendar/src/hanlendar/gui/main_window.py", line 285, in refreshView
+    self.refreshTasksView()
+  File "/media/hdd-stuff/home/bob/Stuff/python/hanlendar/src/hanlendar/gui/main_window.py", line 340, in refreshTasksView
+    self.updateNotificationTimer()
+  File "/media/hdd-stuff/home/bob/Stuff/python/hanlendar/src/hanlendar/gui/main_window.py", line 326, in updateNotificationTimer
+    self.notifsTimer.setNotifications( notifs )
+  File "/media/hdd-stuff/home/bob/Stuff/python/hanlendar/src/hanlendar/gui/notifytimer.py", line 48, in setNotifications
+    self.processNotifs()
+  File "/media/hdd-stuff/home/bob/Stuff/python/hanlendar/src/hanlendar/gui/notifytimer.py", line 68, in processNotifs
+    self.timer.start( millis )      ## 2147483647 maximum accepted value
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: arguments did not match any overloaded call:
+  start(self, msec: int): argument 1 has unexpected type 'float'
+  start(self): too many arguments
+2024-10-03 20:29:50,119 DEBUG    MainThread hanlendar.main:start [main.py:104] Starting the application
