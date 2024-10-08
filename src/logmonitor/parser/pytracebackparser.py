@@ -17,6 +17,10 @@ class PyTracebackParser(ABCParser):
 
     FIRST_LINE = "Traceback (most recent call last):"
 
+    def __init__(self, linesbefore=0):
+        super().__init__()
+        self.lines_before = linesbefore
+
     def parse_content(self, content, file_path=None) -> List[Any]:
         ret_list = []
         lines = content.splitlines()
@@ -25,7 +29,11 @@ class PyTracebackParser(ABCParser):
         for line_index, raw_line in enumerate(lines):
             if raw_line == self.FIRST_LINE:
                 # traceback first line
-                traceback_content = [raw_line]
+                traceback_content = []
+                if self.lines_before > 0:
+                    start_index = max(0, line_index - self.lines_before)
+                    traceback_content = lines[start_index:line_index]
+                traceback_content.append(raw_line)
                 continue
 
             if traceback_content is None:

@@ -29,6 +29,7 @@ item:
       enabled: true
       outfile: "traceback/app2"
       params:
+        linesbefore: 1                      # read N number of lines before traceback
         logfile: "/var/log/app2.txt"
 
     # with parserchain it is possible to run multiple parsers and put output to one file

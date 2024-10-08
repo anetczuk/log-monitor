@@ -48,6 +48,35 @@ class PyTracebackParserTest(unittest.TestCase):
             message_lines[-1],
         )
 
+    def test_parse_traceback_context(self):
+        parser = PyTracebackParser(linesbefore=1)
+        log_pagh = get_data_path("log_trace.txt")
+        response = parser.parse_file(log_pagh)
+
+        self.assertEqual(1, len(response))
+
+        mod_time = response[0][0]
+        # self.assertEqual(1728075360.8512435, mod_time)
+        datestamp = datetime.datetime.fromtimestamp(mod_time)
+        self.assertEqual(datetime.datetime(2024, 10, 4, 22, 56, 0, 851243), datestamp)
+
+        message_id = response[0][1]
+        self.assertEqual("3b6169c3311e84eab8aec3b80628c96a", message_id)
+
+        message_lines = response[0][2]
+        self.assertEqual(
+            "2024-10-04 19:13:38,311 ERROR    MainThread logmonitor.rss.rssmanager:generate_data "
+            "[rssmanager.py:92] exception raised during generator execution",
+            message_lines[0],
+        )
+        self.assertEqual("Traceback (most recent call last):", message_lines[1])
+        self.assertEqual(
+            """RuntimeError: file /tmplog/log.txt: unable to match pattern to line 1: """
+            """2024-10-04 15:09:57,773 INFO     Thread-2 (_runLoop) package:add_offer [google.py:111] """
+            """getting offer details: https://www.google.com""",
+            message_lines[-1],
+        )
+
     def test_parse_traceback_hint(self):
         parser = PyTracebackParser()
         log_pagh = get_data_path("log_trace_hint.txt")

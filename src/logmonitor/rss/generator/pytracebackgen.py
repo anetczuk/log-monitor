@@ -21,9 +21,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class PyTracebackGenerator(RSSGenerator):
-    def __init__(self, name=None, outfile=None, logfile=None, **_kwargs):
+    def __init__(self, name=None, outfile=None, logfile=None, **kwargs):
         super().__init__(outfile)
-        self.parser = PyTracebackParser()
+        self.parser = PyTracebackParser(**kwargs)
         self.name = name
         self.logfile = logfile
 
