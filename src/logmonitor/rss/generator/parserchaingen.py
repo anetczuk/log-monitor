@@ -30,7 +30,8 @@ class ParserChainGenerator(RSSGenerator):
         self.generators = []
         for parser_conf in chain:
             generator_tuple = spawn_generator_from_cfg(parser_conf)
-            self.generators.append(generator_tuple)
+            if generator_tuple is not None:
+                self.generators.append(generator_tuple)
 
     def get_name(self) -> str:
         return self.name
