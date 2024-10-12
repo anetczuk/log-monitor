@@ -40,6 +40,7 @@ class PyTracebackParserTest(unittest.TestCase):
         self.assertEqual("3b6169c3311e84eab8aec3b80628c96a", message_id)
 
         message_lines = response[0][2]
+        self.assertEqual(13, len(message_lines))
         self.assertEqual("Traceback (most recent call last):", message_lines[0])
         self.assertEqual(
             """RuntimeError: file /tmplog/log.txt: unable to match pattern to line 1: """
@@ -64,6 +65,7 @@ class PyTracebackParserTest(unittest.TestCase):
         self.assertEqual("3b6169c3311e84eab8aec3b80628c96a", message_id)
 
         message_lines = response[0][2]
+        self.assertEqual(14, len(message_lines))
         self.assertEqual(
             "2024-10-04 19:13:38,311 ERROR    MainThread logmonitor.rss.rssmanager:generate_data "
             "[rssmanager.py:92] exception raised during generator execution",
@@ -87,14 +89,38 @@ class PyTracebackParserTest(unittest.TestCase):
         mod_time = response[0][0]
         # self.assertEqual(1728075360.8512435, mod_time)
         datestamp = datetime.datetime.fromtimestamp(mod_time)
-        self.assertEqual(datetime.datetime(2024, 10, 8, 17, 1, 42, 186263), datestamp)
+        self.assertEqual(datetime.datetime(2024, 10, 12, 22, 55, 38, 222767), datestamp)
 
         message_id = response[0][1]
-        self.assertEqual("ee87529631a74faf35dc6810a8e2b06f", message_id)
+        self.assertEqual("a769f386f01e569dad7a4985fb6a9894", message_id)
 
         message_lines = response[0][2]
+        self.assertEqual(27, len(message_lines))
         self.assertEqual("Traceback (most recent call last):", message_lines[0])
         self.assertEqual(
             """  start(self): too many arguments""",
+            message_lines[-1],
+        )
+
+    def test_parse_traceback_rethrow(self):
+        parser = PyTracebackParser()
+        log_pagh = get_data_path("log_trace_rethrow.txt")
+        response = parser.parse_file(log_pagh)
+
+        self.assertEqual(1, len(response))
+
+        mod_time = response[0][0]
+        # self.assertEqual(1728075360.8512435, mod_time)
+        datestamp = datetime.datetime.fromtimestamp(mod_time)
+        self.assertEqual(datetime.datetime(2024, 10, 12, 22, 57, 23, 129712), datestamp)
+
+        message_id = response[0][1]
+        self.assertEqual("15cfcd00e761b2eaae24ca53c654b8f2", message_id)
+
+        message_lines = response[0][2]
+        self.assertEqual(79, len(message_lines))
+        self.assertEqual("Traceback (most recent call last):", message_lines[0])
+        self.assertEqual(
+            """requests.exceptions.ConnectionError: HTTPSConnectionPool(host='justjoin.it', port=443): Read timed out.""",
             message_lines[-1],
         )

@@ -1,0 +1,80 @@
+2024-10-11 14:13:12,425 ERROR    Thread-1 (_runLoop) rssforward.rssmanager:generateData [rssmanager.py:131] exception raised during generator execution
+Traceback (most recent call last):
+  File "/tmp/python3.12/site-packages/urllib3/response.py", line 748, in _error_catcher
+    yield
+  File "/tmp/python3.12/site-packages/urllib3/response.py", line 1209, in read_chunked
+    chunk = self._handle_chunk(amt)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/python3.12/site-packages/urllib3/response.py", line 1146, in _handle_chunk
+    value = self._fp._safe_read(amt)  # type: ignore[union-attr]
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/http/client.py", line 640, in _safe_read
+    data = self.fp.read(amt)
+           ^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socket.py", line 707, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ssl.py", line 1252, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/ssl.py", line 1104, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/tmp/python3.12/site-packages/requests/models.py", line 820, in generate
+    yield from self.raw.stream(chunk_size, decode_content=True)
+  File "/tmp/python3.12/site-packages/urllib3/response.py", line 1057, in stream
+    yield from self.read_chunked(amt, decode_content=decode_content)
+  File "/tmp/python3.12/site-packages/urllib3/response.py", line 1189, in read_chunked
+    with self._error_catcher():
+  File "/usr/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/tmp/python3.12/site-packages/urllib3/response.py", line 753, in _error_catcher
+    raise ReadTimeoutError(self._pool, None, "Read timed out.") from e  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='justjoin.it', port=443): Read timed out.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/tmp/rss-forward/src/rssforward/rssmanager.py", line 129, in generateData
+    gen_data: Dict[str, str] = gen.generate()
+                               ^^^^^^^^^^^^^^
+  File "/tmp/rss-forward/src/rssforward/site/justjoinit.py", line 68, in generate
+    content = get_offers_content(filter_label, filter_url, filter_items)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/rss-forward/src/rssforward/site/justjoinit.py", line 97, in get_offers_content
+    add_offer(feed_gen, label, offer)
+  File "/tmp/rss-forward/src/rssforward/site/justjoinit.py", line 132, in add_offer
+    offer_desc = get_description(desc_url)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/rss-forward/src/rssforward/site/justjoinit.py", line 200, in get_description
+    response = requests.get(url, headers=headers, timeout=30)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/python3.12/site-packages/requests/api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/python3.12/site-packages/requests/api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/python3.12/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/python3.12/site-packages/requests/sessions.py", line 724, in send
+    history = [resp for resp in gen]
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/python3.12/site-packages/requests/sessions.py", line 265, in resolve_redirects
+    resp = self.send(
+           ^^^^^^^^^^
+  File "/tmp/python3.12/site-packages/requests/sessions.py", line 746, in send
+    r.content
+  File "/tmp/python3.12/site-packages/requests/models.py", line 902, in content
+    self._content = b"".join(self.iter_content(CONTENT_CHUNK_SIZE)) or b""
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/python3.12/site-packages/requests/models.py", line 826, in generate
+    raise ConnectionError(e)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='justjoin.it', port=443): Read timed out.
