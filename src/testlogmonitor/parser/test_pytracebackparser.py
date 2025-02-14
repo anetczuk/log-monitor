@@ -121,6 +121,7 @@ class PyTracebackParserTest(unittest.TestCase):
         self.assertEqual(79, len(message_lines))
         self.assertEqual("Traceback (most recent call last):", message_lines[0])
         self.assertEqual(
-            """requests.exceptions.ConnectionError: HTTPSConnectionPool(host='justjoin.it', port=443): Read timed out.""",
+            """requests.exceptions.ConnectionError: HTTPSConnectionPool(host='justjoin.it', port=443):"""
+            """ Read timed out.""",
             message_lines[-1],
         )

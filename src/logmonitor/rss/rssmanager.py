@@ -34,6 +34,11 @@ class RSSManager:
             self.type = gentype
             self.valid = True  # answers question: is problem with generator?
 
+        def get_name(self) -> str:
+            if self.generator is None:
+                return None
+            return self.generator.get_name()
+
     # =================================
 
     def __init__(self, parameters=None):
@@ -52,9 +57,10 @@ class RSSManager:
             _LOGGER.warning("invalid state - no generators")
             return False
         for gen_state in self._generators:
-            gen_type = gen_state.type
             if not gen_state.valid:
-                _LOGGER.warning("invalid generator: %s", gen_type)
+                # gen_type = gen_state.type
+                # gen_name = gen_state.get_name()
+                # _LOGGER.warning("invalid generator: %s (%s)", gen_name, gen_type)
                 return False
         # everything ok
         return True
@@ -72,18 +78,18 @@ class RSSManager:
 
         for gen_state in self._generators:
             gen_type = gen_state.type
-            gen = gen_state.generator
+            gen: RSSGenerator = gen_state.generator
             gen_name = gen.get_name()
             _LOGGER.info("----- running generator %s -----", gen_name)
             try:
                 gen_data: Dict[str, str] = gen.generate()
             except Exception:  # pylint: disable=W0703
-                _LOGGER.exception("exception raised during generator execution")
+                _LOGGER.exception("exception raised during generator %s (%s) execution", gen_name, gen_type)
                 gen_state.valid = False
                 continue
 
             if not gen_data:
-                _LOGGER.info("generation not completed for generator '%s'", gen_type)
+                _LOGGER.warning("generation not completed for generator %s (%s)", gen_name, gen_type)
                 gen_state.valid = False
             else:
                 gen_state.valid = True

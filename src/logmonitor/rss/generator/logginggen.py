@@ -9,11 +9,12 @@
 import logging
 
 from feedgen.feed import FeedGenerator
+from feedgen.entry import FeedEntry
 
 from logmonitor.rss.generator.rssgenerator import RSSGenerator
 from logmonitor.parser.loggingparser import LoggingParser
 from logmonitor.rss.utils import init_feed_gen
-from logmonitor.utils import calculate_hash, string_iso_to_date
+from logmonitor.utils import calculate_hash, string_iso_to_date, escape_control_characters
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ class LoggingGenerator(RSSGenerator):
         log_datetime_data = data_dict["asctime"]
         log_datetime = get_log_date(log_datetime_data)
 
-        feed_item = feed_gen.add_entry()
+        feed_item: FeedEntry = feed_gen.add_entry()
 
         # calculating hash from data dict is "fragile"
         # log_hash = calculate_dict_hash(data_dict)
@@ -68,11 +69,13 @@ class LoggingGenerator(RSSGenerator):
         feed_item.title(f"{self.name}: {levelname} - {filename}")
         feed_item.author({"name": self.name, "email": self.name})
 
+        escaped_str = escape_control_characters(raw_log_entry)
+
         # fill description
         content = f"""
 <div>
 <pre>
-{raw_log_entry}
+{escaped_str}
 </pre>
 </div>
 """

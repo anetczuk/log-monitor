@@ -8,7 +8,7 @@
 
 import unittest
 
-from logmonitor.utils import normalize_string
+from logmonitor.utils import normalize_string, escape_control_characters
 
 
 class UtilsTest(unittest.TestCase):
@@ -25,3 +25,7 @@ class UtilsTest(unittest.TestCase):
         converted = []
         converted.append(normalize_string(string[0]))
         self.assertEqual(["aaa bbb\nccc"], converted)
+
+    def test_escape_control_characters(self):
+        content = escape_control_characters("log:\n\x1B[0;31mERROR:\x1B[0m unable to download video")
+        self.assertEqual("log:\n\\x1b[0;31mERROR:\\x1b[0m unable to download video", content)

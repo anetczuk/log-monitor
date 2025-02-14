@@ -13,7 +13,7 @@ from feedgen.feed import FeedGenerator
 
 from logmonitor.rss.generator.rssgenerator import RSSGenerator
 from logmonitor.rss.utils import init_feed_gen
-from logmonitor.utils import add_timezone
+from logmonitor.utils import add_timezone, escape_control_characters
 from logmonitor.parser.pytracebackparser import PyTracebackParser
 
 
@@ -62,11 +62,13 @@ class PyTracebackGenerator(RSSGenerator):
 
         raw_log_entry = "\n".join(msg_list)
 
+        escaped_str = escape_control_characters(raw_log_entry)
+
         # fill description
         content = f"""
 <div>
 <pre>
-{raw_log_entry}
+{escaped_str}
 </pre>
 </div>
 """

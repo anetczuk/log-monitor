@@ -14,6 +14,7 @@ import hashlib
 import json
 import html
 import pytz
+import regex
 
 from appdirs import user_data_dir
 
@@ -135,6 +136,21 @@ def normalize_string(content: str) -> str:
     # return string_encode.decode()
 
     return content
+
+
+def escape_control_characters(content):
+    ## remove control characters
+    # return regex.sub(r'[\x10-\x1f\x7f-\x9f]', '', content)
+
+    ## escape control characters
+    return regex.sub("\x1b", r"\\x1b", content)
+
+    # ## escapes characters like \n
+    # return content.encode('unicode_escape')
+
+    # ## \p{C} is the unicode character property for control characters
+    # ## removes characters like \n
+    # return regex.sub(r'\p{C}', '', content)
 
 
 def read_data(file_path):

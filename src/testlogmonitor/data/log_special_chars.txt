@@ -1,0 +1,1 @@
+2025-02-12 23:44:22,441 ERROR    MainThread rsscast.source.youtube.convert_yt_dlp:error [convert_yt_dlp.py:284] [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
