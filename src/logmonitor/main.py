@@ -74,7 +74,7 @@ def start_with_tray(parameters):
     icon_theme = general_section.get(ConfigField.ICONTHEME.value, True)
 
     black_theme = icon_theme == "black"
-    tray_manager = TrayManager(start_enabled=start_server, black_theme=black_theme)
+    tray_manager = TrayManager(rss_start_enabled=start_server, black_theme=black_theme)
 
     # async start of RSS server
     rss_server = RSSServerManager()

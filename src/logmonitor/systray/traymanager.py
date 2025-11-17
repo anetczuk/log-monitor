@@ -30,8 +30,8 @@ class TrayManagerState(Enum):
 
 
 class TrayManager:
-    def __init__(self, start_enabled=True, black_theme=False):
-        self._server_enabled: bool = start_enabled
+    def __init__(self, rss_start_enabled=True, black_theme=False):
+        self._rss_server_enabled: bool = rss_start_enabled
         self._server_state: TrayManagerState = TrayManagerState.VALID
 
         self.server_callback = None
@@ -50,7 +50,7 @@ class TrayManager:
             self.error_icon_image = load_icon("task-error-icon-w.png")
 
         rss_server_item = pystray.MenuItem(
-            "Run RSS Server", self._on_rss_server_clicked, checked=lambda item: self._server_enabled
+            "Run RSS Server", self._on_rss_server_clicked, checked=lambda item: self._rss_server_enabled
         )
 
         rss_refresh_item = pystray.MenuItem("Refresh RSS", self._on_refresh_clicked)
@@ -63,12 +63,12 @@ class TrayManager:
         self._set_icon()
 
     @property
-    def server_enabled(self):
-        return self._server_enabled
+    def rss_server_enabled(self):
+        return self._rss_server_enabled
 
-    @server_enabled.setter
-    def server_enabled(self, new_state: bool):
-        self._server_enabled = new_state
+    @rss_server_enabled.setter
+    def rss_server_enabled(self, new_state: bool):
+        self._rss_server_enabled = new_state
         self._set_icon()
 
     # @property
@@ -100,12 +100,13 @@ class TrayManager:
             self.tray_icon.icon = self.processing_icon_image
             return
 
-        if not self._server_enabled:
-            _LOGGER.info("server disabled - setting disabled icon")
-            self.tray_icon.icon = self.disabled_icon_image
-            return
+        if not self._rss_server_enabled:
+            _LOGGER.info("server disabled")
+            # self.tray_icon.icon = self.disabled_icon_image
+            # return
+        else:
+            _LOGGER.info("server operational - setting OK icon")
 
-        _LOGGER.info("server operational - setting OK icon")
         self.tray_icon.icon = self.ok_icon_image
 
     def run_loop(self):
@@ -130,14 +131,14 @@ class TrayManager:
     # =================================================
 
     def _on_rss_server_clicked(self, icon, item):  # pylint: disable=W0613
-        self._server_enabled = not item.checked
+        self._rss_server_enabled = not item.checked
         self._set_icon()
         # icon.notify("server clicked")
-        _LOGGER.info("server clicked to state %s", self._server_enabled)
+        _LOGGER.info("server clicked to state %s", self._rss_server_enabled)
         if self.server_callback is None:
             _LOGGER.info("server callback not set")
             return
-        self.server_callback(self._server_enabled)
+        self.server_callback(self._rss_server_enabled)
 
     def _on_refresh_clicked(self, icon, item):  # pylint: disable=W0613
         _LOGGER.info("refresh clicked")
